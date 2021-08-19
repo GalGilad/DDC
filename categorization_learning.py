@@ -748,7 +748,7 @@ if __name__ == "__main__":
     # parse script parameters
     parser = argparse.ArgumentParser(description='categorization_learning')
     # general parameters
-    parser.add_argument('--datatype', type=str, default='example', help='datasets separated with ,')
+    parser.add_argument('--data_name', type=str, default='example', help='datasets separated with ,')
     parser.add_argument('--opt_k', type=str, default='5', help='optimal Ks separated with ,')
     parser.add_argument('--kmer', type=int, default=7, choices=[7], help='7mer sequences')
     # genetic algorithm parameters
