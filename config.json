@@ -1,0 +1,12 @@
+{
+	"datasets": [{
+		"dataset_name": "example",
+		"optimal_k": 5,
+		"cosmic_signatures": [
+			"Signature 1",
+			"Signature 2",
+			"Signature 3",
+			"Signature 4"
+		]
+	}]
+}
