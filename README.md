@@ -35,4 +35,6 @@ How to run:
 
 Configuration of datasets is based on the config.json file. Current configuration will run the script with the example data, assuming optimal_k=5 and activity of COSMIC signatures 1-4. To add more datasets to the evaluation script, add datasets under "datasets" in the config.json file.
 
+
+
 [1] I. C. G. Consortium. International network of cancer genome projects. Nature, 464(7291):993{998, Apr 2010. 20393554[pmid].
