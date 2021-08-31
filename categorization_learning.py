@@ -509,7 +509,7 @@ class GeneticAlgorithm(object):
         self.ancestor_size = ancestor_size
         if self.ancestor_size is None:
             self.ancestor_size = self.population_size
-        self.n_to_keep = 5
+        self.n_to_keep = len(DATASET_NAMES)*2
 
         self.current_generation = 0
         self.run_name = run_name
@@ -666,7 +666,7 @@ class GeneticAlgorithm(object):
         print("Done.\n")
 
         print("Performing crossover and mutation in population...")
-        print("Catergorizations in population before crossover:", len(self.population))
+        print("Categorizations in population before crossover:", len(self.population))
         cats_to_keep_idx = [self.categorization_by_all_fitness[dataset][0] for dataset in DATASET_NAMES]
         if best_categorization_idx not in cats_to_keep_idx:
             cats_to_keep_idx.append(best_categorization_idx)
@@ -688,11 +688,11 @@ class GeneticAlgorithm(object):
         cats_to_keep = [self.population[i] for i in cats_to_keep_idx]
         n_offspring = self.population_size - len(cats_to_keep_idx)
         self.__population_crossover(n_offspring)
-        print("Catergorizations kept:", len(cats_to_keep_idx), "Offspring produced:", len(self.offspring))
+        print("Categorizations kept:", len(cats_to_keep_idx), "Offspring produced:", len(self.offspring))
         new_population = cats_to_keep + self.offspring
         self.population = new_population
         print("Done.\n")
-        print("Catergorizations in population:", len(self.population))
+        print("Categorizations in population:", len(self.population))
         gen_end = time.time()
         gen_runtime = str(timedelta(seconds=gen_end - gen_start))
         print("Generation Runtime:", gen_runtime)
