@@ -76,7 +76,6 @@ class Categorization(object):
         self.kmers_to_categories = {}
         self.train_exposures = {}
         self.fitness_scores = {}
-        self.validation_scores = {}
 
     def __opportunity_normalization(self, signatures, dataset_name):
         """
@@ -528,7 +527,6 @@ class GeneticAlgorithm(object):
         self.categorization_by_all_fitness = {}
         self.offspring = []
         self.train_fitness_history = []
-        self.test_fitness_history = []
 
     def __probs(self, values):
         """
@@ -617,7 +615,7 @@ class GeneticAlgorithm(object):
         if self.current_generation == 1:
             for i, dataset in enumerate(DATASETS):
                 np.save(gen_directory + '%s_test_samples.npy' % DATASET_NAMES[i], dataset.test_samples)
-        np.save(gen_directory + 'categories_of_best.npy', best_categorization.categories)
+        np.save(gen_directory + 'categories_of_best_overall.npy', best_categorization.categories)
         for dataset_name in DATASET_NAMES:
             cat_to_save = self.population[self.categorization_by_all_fitness[dataset_name][0]]
             np.save(gen_directory + 'categories_of_best_%s.npy' % dataset_name, cat_to_save.categories)
@@ -626,7 +624,9 @@ class GeneticAlgorithm(object):
         percent_of_junk = np.count_nonzero(best_categorization.assignments == arg_of_junk) / len(
             best_categorization.assignments)
         self.train_fitness_history.append(best_categorization.fitness_scores)
-        self.test_fitness_history.append(best_categorization.validation_scores)
+        if self.current_generation % 10 == 0:
+            with open(gen_directory + 'fitness_history.pickle', 'wb') as handle:
+                pickle.dump(self.train_fitness_history, handle)
         avg_length = np.mean([len(category.sequence) for category in best_categorization.categories])
         best_catalog = best_categorization.catalogs[DATASETS[0].dataset_name]['train']
 
@@ -786,7 +786,7 @@ if __name__ == "__main__":
     KMER_TO_IDX = {kmer: idx for idx, kmer in enumerate(WXS_OPPORTUNITY.keys())}
     EMPTY_CATEGORY = Category(start_idx=0, sequence='N' * SEQ_LENGTH)
     DATASETS = []
-    DATASET_NAMES = [dataset.strip() for dataset in args.datatype.split(",")]
+    DATASET_NAMES = [dataset.strip() for dataset in args.data_name.split(",")]
     OPT_K = [k.strip() for k in args.opt_k.split(",")]
 
     for i, dataset_name_glb in enumerate(DATASET_NAMES):
@@ -795,7 +795,7 @@ if __name__ == "__main__":
                                 path_to_ge_data=PATH_TO_INPUT + '%s_ge.csv' % dataset_name_glb,
                                 dataset_name=dataset_name_glb, optimal_k=int(OPT_K[i]), k_range=None))
     timestamp = datetime.datetime.now().strftime('%d-%m_%H-%M-%S')
-    run_name = '%s_kmer-%d_mut-%.2f_q-%.2f_c-%d_power-%d_%s' % (args.datatype, SEQ_LENGTH, MUTATION_RATE, Q_CROSSOVER,
+    run_name = '%s_kmer-%d_mut-%.2f_q-%.2f_c-%d_power-%d_%s' % (args.data_name, SEQ_LENGTH, MUTATION_RATE, Q_CROSSOVER,
                                                                 C_DIRICHLET, SELECTION_POWER, timestamp)
 
     GA = GeneticAlgorithm(population_size=POPULATION_SIZE, ancestor_size=ANCESTOR_SIZE, run_name=run_name)
