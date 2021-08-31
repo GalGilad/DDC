@@ -13,7 +13,7 @@ categorization_learning.py and categorization_evaluation.py scripts are independ
 
 # categorization_learning.py
 How to run:
-- python categorization_learning.py --data example --opt_k 5
+- python categorization_learning.py --data_name example --opt_k 5
 
 In this case, the script will load example_catalog.csv , example_ge.csv , example_wgs_catalog.csv files
 
