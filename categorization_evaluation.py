@@ -3,6 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
 from matplotlib import gridspec
+import matplotlib.transforms as trns
+from matplotlib.text import TextPath
+from matplotlib.patches import PathPatch
+from matplotlib.font_manager import FontProperties
 from sklearn.decomposition import NMF
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
@@ -11,7 +15,6 @@ import os
 import pickle
 import copy
 import json
-import utils
 import rcca
 
 
@@ -365,7 +368,6 @@ class DatasetEvaluation(object):
         :param reps: number of NMF runs (int)
         :return: the best sklearn NMF model
         """
-        np.random.seed()
         models, res = [], []
         for i in np.arange(reps):
             model = NMF(n_components=k, init='random', max_iter=1000, solver='mu', beta_loss='kullback-leibler')
@@ -575,6 +577,16 @@ def save_raw_results():
         pickle.dump(NEW_SIGS, file)
 
 
+def draw(c, x, y, yscale=1, ax=None):
+    text = CHARS[c]
+    t = trns.Affine2D().scale(1*globscale, yscale*globscale) + \
+        trns.Affine2D().translate(x, y) + ax.transData
+    p = PathPatch(text, lw=0, fc=CHAR_TO_COLOR[c], transform=t)
+    if ax != None:
+        ax.add_artist(p)
+    return p
+
+
 def plot_category(frequencies, axs_i, i, categories_prevalence, j=0):
     """
     Helper function for 'produce_categories_figure' function. produces a single category visualization.
@@ -585,7 +597,7 @@ def plot_category(frequencies, axs_i, i, categories_prevalence, j=0):
         for freq in frequencies:
             y = 0
             for base, f in freq.items():
-                utils.draw(base, x, y, f, axs_i[j])
+                draw(base, x, y, f, axs_i[j])
                 y += f
             x += 1
             maxi = max(maxi, y)
@@ -806,7 +818,7 @@ def add_categories_to_signature_figure(fig, gs, categories):
         for freq in frequencies:
             y = 0
             for base, f in freq.items():
-                utils.draw(base, x, y, f, ax)
+                draw(base, x, y, f, ax)
                 y += f
             x += 1
             maxi = max(maxi, y)
@@ -905,6 +917,16 @@ if __name__ == "__main__":
     REPEATS = 4
     MAX_FIG_X_IN_A_ROW = 3
     ORIGINAL_BASE_POSITION_IN_MUTATION_DATA = SEQ_LENGTH // 2
+
+    ### 'draw' variables ###
+    fp = FontProperties(family="Arial", weight="bold")
+    globscale = 1.35
+    CHARS = {"T": TextPath((-0.305, 0), "T", size=1, prop=fp),  "G": TextPath((-0.384, 0), "G", size=1, prop=fp),
+             "A": TextPath((-0.35, 0), "A", size=1, prop=fp), "C": TextPath((-0.366, 0), "C", size=1, prop=fp),
+             "N": TextPath((-0.325, 0), "N", size=1, prop=fp), ">": TextPath((-0.316, 0), ">", size=1, prop=fp),
+             "x": TextPath((-0.316, 0), "x", size=1, prop=fp)}
+    CHAR_TO_COLOR = {'G': 'green', 'A': 'blue', 'C': 'red', 'T': 'orange', 'N': 'black', '>': 'black', 'x': 'black'}
+    #######################
 
     DDR_GENE_SET = np.load('data/DDR_genes.npy', allow_pickle=True)
     HR_GENE_SET = np.load('data/HR_genes.npy', allow_pickle=True)

@@ -411,9 +411,10 @@ class Categorization(object):
         Evaluates a categorization: assigns sequences to categories, produces signature and exposure matrices, then
         computes correlation between exposure and gene expression (categorization's fitness).
         """
-        self.assign_kmers_to_categories()
-        self.__run_nmf()
-        self.__compute_fitness()
+        if not self.fitness_scores:
+            self.assign_kmers_to_categories()
+            self.__run_nmf()
+            self.__compute_fitness()
 
         return self, self.fitness_scores
 
@@ -707,9 +708,9 @@ def single_crossover(parents):
     """
     np.random.seed()
     crossover_flag = random.uniform(0, 1) < Q_CROSSOVER
-    if not crossover_flag:  # only mutate fit categorization
+    if not crossover_flag:  # only mutate
         offspring = Categorization(copy.deepcopy(parents[0].categories))
-    else:  # perform crossover and then mutate offspring
+    else:  # perform crossover before mutation
         take_percentage_weak = np.random.uniform(MUTATION_RATE, 0.4)
         take_percentage_strong = 1.0 - take_percentage_weak
         s_strong_parent, s_weak_parent = len(parents[0].categories), len(parents[1].categories)
@@ -739,7 +740,6 @@ def single_crossover(parents):
                 categories = [category for i, category in enumerate(parents[0].categories) if
                               i in categories_from_fit_parent]
             offspring = Categorization(categories)
-    # perform mutation and assignment
     offspring.mutate()
     return offspring
 
@@ -777,11 +777,11 @@ if __name__ == "__main__":
 
     PATH_TO_INPUT = 'data/'
     DDR_GENE_SET = np.load(PATH_TO_INPUT + 'DDR_genes.npy', allow_pickle=True)
-    WGS_OPPORTUNITY_FILE = PATH_TO_INPUT + 'wgs_opportunity_7mer_dictionary.pickle'
-    WXS_OPPORTUNITY_FILE = PATH_TO_INPUT + 'wxs_opportunity_7mer_dictionary.pickle'
-    with open(WGS_OPPORTUNITY_FILE, 'rb') as handle:
+    wgs_opportunity_file = PATH_TO_INPUT + 'wgs_opportunity_7mer_dictionary.pickle'
+    wxs_opportunity_file = PATH_TO_INPUT + 'wxs_opportunity_7mer_dictionary.pickle'
+    with open(wgs_opportunity_file, 'rb') as handle:
         WGS_OPPORTUNITY = pickle.load(handle)
-    with open(WXS_OPPORTUNITY_FILE, 'rb') as handle:
+    with open(wxs_opportunity_file, 'rb') as handle:
         WXS_OPPORTUNITY = pickle.load(handle)
     KMER_TO_IDX = {kmer: idx for idx, kmer in enumerate(WXS_OPPORTUNITY.keys())}
     EMPTY_CATEGORY = Category(start_idx=0, sequence='N' * SEQ_LENGTH)
